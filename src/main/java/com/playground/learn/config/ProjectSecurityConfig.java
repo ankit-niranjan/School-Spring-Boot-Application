@@ -15,16 +15,18 @@ public class ProjectSecurityConfig {
      * From Spring Security 5.7, the WebSecurityConfigurerAdapter is deprecated to encourage users
      * to move towards a component-based security configuration. It is recommended to create a bean
      * of type SecurityFilterChain for security related configurations.
+     *
      * @param http
      * @return SecurityFilterChain
      * @throws Exception
      */
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-
-            http.csrf().ignoringRequestMatchers("/saveMsg").and()
+        http.csrf().ignoringRequestMatchers("/saveMsg").and()
                 .authorizeHttpRequests()
                 .requestMatchers("/dashboard").authenticated()
+                .requestMatchers("/displayMessages").hasRole("ADMIN")
+                .requestMatchers("/closeMsg/**").hasRole("ADMIN")
                 .requestMatchers("/home").permitAll()
                 .requestMatchers("/holidays/**").permitAll()
                 .requestMatchers("/contact").permitAll()
@@ -39,7 +41,8 @@ public class ProjectSecurityConfig {
                 .and().logout().logoutSuccessUrl("/login?logout=true").invalidateHttpSession(true).permitAll()
                 .and().httpBasic();
 
-            return http.build();
+        return http.build();
+
     }
 
     @Bean
@@ -53,7 +56,7 @@ public class ProjectSecurityConfig {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("54321")
-                .roles("USER","ADMIN")
+                .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(user, admin);
     }
